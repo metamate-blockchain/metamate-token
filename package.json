@@ -1,0 +1,25 @@
+{
+  "name": "metamate-token",
+  "version": "1.0.0",
+  "description": "Metamate ERC-20 token",
+  "main": "hardhat.config.js",
+  "scripts": {
+    "clean": "rimraf ./build/ ./cache/ ./artifacts/",
+    "precompile": "yarn clean",
+    "compile": "npx hardhat compile",
+    "deploy-testnet": "npx hardhat run scripts/deploy.js --network testnet"
+  },
+  "keywords": [],
+  "author": "Chester Ngo",
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "ethers": "^5.4.7",
+    "hardhat": "^2.6.5",
+    "dotenv": "^8.2.0"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-etherscan": "^2.1.6"
+  }
+}
