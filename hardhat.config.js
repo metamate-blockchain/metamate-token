@@ -7,7 +7,13 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const BSC_SCAN_KEY = process.env.BSC_SCAN_KEY;
 
 module.exports = {
-  solidity: "0.8.0",
+  solidity: {
+    compilers: [
+      {
+        version: "0.6.2",
+      }
+    ],
+  },
   networks: {
     testnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",

@@ -5,19 +5,19 @@
   "main": "hardhat.config.js",
   "scripts": {
     "clean": "rimraf ./build/ ./cache/ ./artifacts/",
-    "precompile": "yarn clean",
     "compile": "npx hardhat compile",
-    "deploy-testnet": "npx hardhat run scripts/deploy.js --network testnet"
+    "deploy-token-testnet": "npx hardhat run scripts/deploy-token.js --network testnet"
   },
   "keywords": [],
   "author": "Chester Ngo",
   "license": "ISC",
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.1",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@openzeppelin/contracts": "3.4.0",
+    "@uniswap/v2-core": "git://github.com/pancakeswap/pancake-swap-core.git",
+    "dotenv": "^8.2.0",
     "ethers": "^5.4.7",
-    "hardhat": "^2.6.5",
-    "dotenv": "^8.2.0"
+    "hardhat": "^2.6.5"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-etherscan": "^2.1.6"
