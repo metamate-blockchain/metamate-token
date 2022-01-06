@@ -36,9 +36,11 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     bool public BPDisabledForever = false;
 
     constructor() public ERC20("MTM TOKEN", "MTM") {
-        //testnet
-        IPancakeRouter02 _pancakeswapV2Router = IPancakeRouter02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
-        //mainnet
+        // Pancake address testnet
+        IPancakeRouter02 _pancakeswapV2Router = IPancakeRouter02(
+            0xD99D1c33F9fC3444f8101754aBC46c52416550D1
+        );
+        // Pancake address mainnet
         // IPancakeRouter02 _pancakeswapV2Router = IPancakeRouter02(
         //     0x10ED43C718714eb63d5aA57B78B54704E256024E
         // );
@@ -59,14 +61,14 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     receive() external payable {}
 
     function setFee(uint256 _sellFee, uint256 _buyFee) public onlyOwner {
-        require(0 <= _sellFee && _sellFee <= 10, "SellFee <= 10");
-        require(0 <= _buyFee && _buyFee <= 10, "BuyFee <= 10");
+        require(0 <= _sellFee && _sellFee <= 10, "MTMToken: SellFee <= 10");
+        require(0 <= _buyFee && _buyFee <= 10, "MTMToken: BuyFee <= 10");
         sellFee = _sellFee;
         buyFee = _buyFee;
     }
 
     function setMktAddress(address _wallet) external onlyOwner {
-        require(_wallet != address(0), "Invalid Address");
+        require(_wallet != address(0), "MTMToken: Invalid Address");
         mktAddr = _wallet;
     }
 
@@ -88,13 +90,13 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
             BP.protect(from, to, amount);
         }
 
-        require(amount > 0, "amount = 0");
+        require(amount > 0, "MTMToken: amount = 0");
         if (
             amount > maxAmount &&
             to == pancakeswapV2Pair &&
             !isWhitelistAddr(from)
         ) {
-            revert("MaxAmount");
+            revert("MTMToken: MaxAmount");
         }
 
         uint256 transferFee = to == pancakeswapV2Pair
@@ -103,7 +105,7 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
 
         if (transferFee > 0 && from != address(this) && to != address(this)) {
             uint256 _fee = amount.mul(transferFee).div(100);
-            super._transfer(from, address(this), _fee);
+            swapTokensForEth(_fee);
             amount = amount.sub(_fee);
         }
 
@@ -111,7 +113,7 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     }
 
     function setMaxAmount(uint256 _maxAmount) external onlyOwner {
-        require(_maxAmount > 200 * 10**3 * 10**18, "maxAmount too small");
+        require(_maxAmount > 200 * 10**3 * 10**18, "MTMToken: maxAmount too small");
         maxAmount = _maxAmount;
     }
 
@@ -120,15 +122,6 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
         onlyOwner
     {
         swapTokensAtAmount = _swapTokensAtAmount;
-    }
-
-    function swapForMkt() public nonReentrant onlyOwner {
-        uint256 _contractBalance = balanceOf(address(this));
-        require(
-            _contractBalance >= swapTokensAtAmount,
-            "contractBalance < swapTokensAtAmount"
-        );
-        swapTokensForEth(swapTokensAtAmount);
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
@@ -151,7 +144,7 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
 
     //Bot Protect Func
     function setBPAddrss(address _bp) external onlyOwner {
-        require(address(BP) == address(0), "Can only be initialized once");
+        require(address(BP) == address(0), "MTMToken: Can only be initialized once");
         BP = BPContract(_bp);
     }
 
