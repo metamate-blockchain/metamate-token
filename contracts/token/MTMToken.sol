@@ -30,10 +30,6 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     uint256 public swapTokensAtAmount = 10 * 10**3 * 10**18;
     // exlcude from fees and max transaction amount
     mapping(address => bool) private _isWhitelist;
-    //Bot Protect
-    BPContract public BP;
-    bool public bpEnabled;
-    bool public BPDisabledForever = false;
 
     constructor() public ERC20("MTM TOKEN", "MTM") {
         // Pancake address testnet
@@ -85,11 +81,6 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
         address to,
         uint256 amount
     ) internal override {
-        //Bot Protect
-        if (bpEnabled && !BPDisabledForever) {
-            BP.protect(from, to, amount);
-        }
-
         require(amount > 0, "MTMToken: amount = 0");
         if (
             amount > maxAmount &&
@@ -140,20 +131,5 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
                     block.timestamp
                 )
         {} catch {}
-    }
-
-    //Bot Protect Func
-    function setBPAddrss(address _bp) external onlyOwner {
-        require(address(BP) == address(0), "MTMToken: Can only be initialized once");
-        BP = BPContract(_bp);
-    }
-
-    function setBpEnabled(bool _enabled) external onlyOwner {
-        bpEnabled = _enabled;
-    }
-
-    function setBotProtectionDisableForever() external onlyOwner {
-        require(BPDisabledForever == false);
-        BPDisabledForever = true;
     }
 }
