@@ -4,20 +4,12 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@uniswap/v2-core/contracts/interfaces/IPancakePair.sol";
 import "@uniswap/v2-core/contracts/interfaces/IPancakeFactory.sol";
 import "../interfaces/IPancakeRouter.sol";
+import "../utils/LGEWhitelisted.sol";
 
-abstract contract BPContract {
-    function protect(
-        address sender,
-        address receiver,
-        uint256 amount
-    ) external virtual;
-}
-
-contract MTMToken is ERC20, Ownable, ReentrancyGuard {
+contract MTMToken is Context, ERC20, Ownable, LGEWhitelisted  {
     using SafeMath for uint256;
     IPancakeRouter02 public pancakeswapV2Router;
     address public pancakeswapV2Pair;
@@ -27,7 +19,6 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     uint256 public maxAmount = 200 * 10**3 * 10**18;
 
     address public mktAddr = 0x0af7e6C3dCEd0f86d82229Bd316d403d78F54E07;
-    uint256 public swapTokensAtAmount = 10 * 10**3 * 10**18;
     // exlcude from fees and max transaction amount
     mapping(address => bool) private _isWhitelist;
 
@@ -81,6 +72,11 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
         address to,
         uint256 amount
     ) internal override {
+        require(from != address(0), "MTMToken: transfer from the zero address");
+        require(to != address(0), "MTMToken: transfer to the zero address");
+        
+        _applyLGEWhitelist(from, to, amount);
+
         require(amount > 0, "MTMToken: amount = 0");
         if (
             amount > maxAmount &&
@@ -104,15 +100,11 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     }
 
     function setMaxAmount(uint256 _maxAmount) external onlyOwner {
-        require(_maxAmount > 200 * 10**3 * 10**18, "MTMToken: maxAmount too small");
+        require(
+            _maxAmount > 200 * 10**3 * 10**18,
+            "MTMToken: maxAmount too small"
+        );
         maxAmount = _maxAmount;
-    }
-
-    function setSwapTokensAtAmount(uint256 _swapTokensAtAmount)
-        external
-        onlyOwner
-    {
-        swapTokensAtAmount = _swapTokensAtAmount;
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
