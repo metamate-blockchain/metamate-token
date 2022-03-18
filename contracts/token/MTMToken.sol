@@ -14,8 +14,8 @@ contract MTMToken is Context, ERC20, Ownable, LGEWhitelisted  {
     IPancakeRouter02 public pancakeswapV2Router;
     address public pancakeswapV2Pair;
 
-    uint256 public sellFee = 2;
-    uint256 public buyFee = 1;
+    uint256 public sellFee = 3;
+    uint256 public buyFee = 0;
     uint256 public maxAmount = 200 * 10**3 * 10**18;
 
     address public mktAddr = 0x0af7e6C3dCEd0f86d82229Bd316d403d78F54E07;
@@ -42,7 +42,7 @@ contract MTMToken is Context, ERC20, Ownable, LGEWhitelisted  {
         setWhitelistAddr(owner(), true);
         setWhitelistAddr(mktAddr, true);
 
-        _mint(owner(), 1200000000 * (10**18));
+        _mint(owner(), 1000000000 * (10**18));
     }
 
     receive() external payable {}
