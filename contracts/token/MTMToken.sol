@@ -18,19 +18,19 @@ contract MTMToken is Context, ERC20, Ownable, LGEWhitelisted  {
     uint256 public buyFee = 0;
     uint256 public maxAmount = 200 * 10**3 * 10**18;
 
-    address public mktAddr = 0x0af7e6C3dCEd0f86d82229Bd316d403d78F54E07;
+    address public mktAddr = 0x6dBfCBaa184aE6AC62d02304CD18900a2796c7d9;
     // exlcude from fees and max transaction amount
     mapping(address => bool) private _isWhitelist;
 
-    constructor() public ERC20("MTM TOKEN", "MTM") {
+    constructor() public ERC20("MetaMate", "MTM") {
         // Pancake address testnet
-        IPancakeRouter02 _pancakeswapV2Router = IPancakeRouter02(
-            0xD99D1c33F9fC3444f8101754aBC46c52416550D1
-        );
-        // Pancake address mainnet
         // IPancakeRouter02 _pancakeswapV2Router = IPancakeRouter02(
-        //     0x10ED43C718714eb63d5aA57B78B54704E256024E
+        //     0xD99D1c33F9fC3444f8101754aBC46c52416550D1
         // );
+        // Pancake address mainnet
+        IPancakeRouter02 _pancakeswapV2Router = IPancakeRouter02(
+            0x10ED43C718714eb63d5aA57B78B54704E256024E
+        );
         // Create a pancakeswap pair for this new token
         address _pancakeswapV2Pair = IPancakeFactory(
             _pancakeswapV2Router.factory()
