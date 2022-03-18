@@ -4,36 +4,23 @@ pragma solidity ^0.6.2;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@uniswap/v2-core/contracts/interfaces/IPancakePair.sol";
 import "@uniswap/v2-core/contracts/interfaces/IPancakeFactory.sol";
 import "../interfaces/IPancakeRouter.sol";
+import "../utils/LGEWhitelisted.sol";
 
-abstract contract BPContract {
-    function protect(
-        address sender,
-        address receiver,
-        uint256 amount
-    ) external virtual;
-}
-
-contract MTMToken is ERC20, Ownable, ReentrancyGuard {
+contract MTMToken is Context, ERC20, Ownable, LGEWhitelisted  {
     using SafeMath for uint256;
     IPancakeRouter02 public pancakeswapV2Router;
     address public pancakeswapV2Pair;
 
-    uint256 public sellFee = 2;
-    uint256 public buyFee = 1;
+    uint256 public sellFee = 3;
+    uint256 public buyFee = 0;
     uint256 public maxAmount = 200 * 10**3 * 10**18;
 
     address public mktAddr = 0x0af7e6C3dCEd0f86d82229Bd316d403d78F54E07;
-    uint256 public swapTokensAtAmount = 10 * 10**3 * 10**18;
     // exlcude from fees and max transaction amount
     mapping(address => bool) private _isWhitelist;
-    //Bot Protect
-    BPContract public BP;
-    bool public bpEnabled;
-    bool public BPDisabledForever = false;
 
     constructor() public ERC20("MTM TOKEN", "MTM") {
         // Pancake address testnet
@@ -55,7 +42,7 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
         setWhitelistAddr(owner(), true);
         setWhitelistAddr(mktAddr, true);
 
-        _mint(owner(), 1200000000 * (10**18));
+        _mint(owner(), 1000000000 * (10**18));
     }
 
     receive() external payable {}
@@ -85,10 +72,10 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
         address to,
         uint256 amount
     ) internal override {
-        //Bot Protect
-        if (bpEnabled && !BPDisabledForever) {
-            BP.protect(from, to, amount);
-        }
+        require(from != address(0), "MTMToken: transfer from the zero address");
+        require(to != address(0), "MTMToken: transfer to the zero address");
+        
+        _applyLGEWhitelist(from, to, amount);
 
         require(amount > 0, "MTMToken: amount = 0");
         if (
@@ -113,15 +100,11 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
     }
 
     function setMaxAmount(uint256 _maxAmount) external onlyOwner {
-        require(_maxAmount > 200 * 10**3 * 10**18, "MTMToken: maxAmount too small");
+        require(
+            _maxAmount > 200 * 10**3 * 10**18,
+            "MTMToken: maxAmount too small"
+        );
         maxAmount = _maxAmount;
-    }
-
-    function setSwapTokensAtAmount(uint256 _swapTokensAtAmount)
-        external
-        onlyOwner
-    {
-        swapTokensAtAmount = _swapTokensAtAmount;
     }
 
     function swapTokensForEth(uint256 tokenAmount) private {
@@ -140,20 +123,5 @@ contract MTMToken is ERC20, Ownable, ReentrancyGuard {
                     block.timestamp
                 )
         {} catch {}
-    }
-
-    //Bot Protect Func
-    function setBPAddrss(address _bp) external onlyOwner {
-        require(address(BP) == address(0), "MTMToken: Can only be initialized once");
-        BP = BPContract(_bp);
-    }
-
-    function setBpEnabled(bool _enabled) external onlyOwner {
-        bpEnabled = _enabled;
-    }
-
-    function setBotProtectionDisableForever() external onlyOwner {
-        require(BPDisabledForever == false);
-        BPDisabledForever = true;
     }
 }
